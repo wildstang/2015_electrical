@@ -354,36 +354,6 @@ void twinkle(byte times, byte numLit)
    }
 }
 
-void twinkle(byte times, byte numLit, byte bgred, byte bggreen, byte bgblue, byte fgred, byte fggreen, byte fgblue, unsigned int wait)
-{
-   int pixels[STRIP_LENGTH] = {0};
-   
-   for (byte i = 0; i < times; i++)
-   {
-      for (byte i = 0; i < numLit; i++)
-      {
-         pixels[random(STRIP_LENGTH)] = 1;
-      }
-
-      for (unsigned int i=0; i < strip.numPixels(); i++)
-      {
-         if (pixels[i])
-         {
-            strip.setPixelColor(i, strip.Color(fgred, fggreen, fgblue));
-         }
-         else
-         {
-            strip.setPixelColor(i, strip.Color(bgred, bggreen, bgblue));
-         }
-      }  
-      strip.show();
-      if (true == timedWait(wait))
-      {
-         return;
-      }
-   }
-}
-
 
 void colorFlowDownShimmer(byte red, byte green, byte blue)
 {
