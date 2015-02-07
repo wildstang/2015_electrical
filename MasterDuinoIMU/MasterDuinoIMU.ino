@@ -1,6 +1,6 @@
 #include "Wire.h"
 
-  byte RAxH, RAyH, RAzH, RHeadingH, RGxH, RGyH, RGzH, RAxL, RAyL, RAzL, RHeadingL, RGxL, RGyL, RGzL;
+  signed int RAxH, RAyH, RAzH, RHeadingH, RGxH, RGyH, RGzH, RAxL, RAyL, RAzL, RHeadingL, RGxL, RGyL, RGzL;
   int ExpectedBytes = 14;
   
   int number = 0;
@@ -35,7 +35,7 @@ number++;
 void ReadIMU()
 {
   int x = 0;
-  byte imuReturn[14];
+  signed int imuReturn[14];
   
   Wire.requestFrom(0x6F, ExpectedBytes);
 while (Wire.available())
@@ -45,30 +45,31 @@ while (Wire.available())
     imuReturn[x] = Wire.read();
   }
   
-  RAxH = imuReturn[0];
+  RAxH = imuReturn[0] << 8;
   RAxL = imuReturn[1];
-  RAyH = imuReturn[2];
+  RAyH = imuReturn[2] << 8;
   RAyL = imuReturn[3];
-  RAzH = imuReturn[4];
+  RAzH = imuReturn[4] << 8;
   RAzL = imuReturn[5];
-  RHeadingH = imuReturn[6];
+  RHeadingH = imuReturn[6] << 8;
   RHeadingL = imuReturn[7];
-  RGxH = imuReturn[8];
+  RGxH = imuReturn[8] << 8;
   RGxL = imuReturn[9];
-  RGyH = imuReturn[10];
+  RGyH = imuReturn[10] << 8;
   RGyL = imuReturn[11];
-  RGzH = imuReturn[12];
+  RGzH = imuReturn[12] << 8;
   RGzL = imuReturn[13];
 }
+dataArrange();
 }
 
 void dataArrange()
 {
-  RAx = (RAxH + RAxL) / 100;
-  RAy = (RAyH + RAyL) / 100;
-  RAz = (RAzH + RAzL) / 100;
+  RAx = (RAxH + RAxL) / 10;
+  RAy = (RAyH + RAyL) / 10;
+  RAz = (RAzH + RAzL) / 10;
   RHeading = (RHeadingH + RHeadingL);
-  RGx = (RGxH + RGxL) / 100;
-  RGy = (RGyH + RGyL) / 100;
-  RGz = (RGzH + RGzL) / 100;
+  RGx = (RGxH + RGxL) / 10;
+  RGy = (RGyH + RGyL) / 10;
+  RGz = (RGzH + RGzL) / 10;
 }

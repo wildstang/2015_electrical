@@ -75,9 +75,9 @@ boolean Failure = false;
 
 float aX, aY, aZ, gX, gY, gZ, mX, mY, mZ = 0;
 
-byte HeadingH, AxH, AyH, AzH, GxH, GyH, GzH, HeadingL, AxL, AyL, AzL, GxL, GyL, GzL;
+signed int HeadingH, AxH, AyH, AzH, GxH, GyH, GzH, HeadingL, AxL, AyL, AzL, GxL, GyL, GzL;
 
-int IAx, IAy, IAz, IHeading, IGx, IGy, IGz;
+signed int IAx, IAy, IAz, IHeading, IGx, IGy, IGz;
 
 //int RioAddress = 1;
 
@@ -317,29 +317,29 @@ void ReturnIMU()
 
 void SetWireValues()
 {
-  IAx = (aX * 100);
-  IAy = (aY * 100);
-  IAz = (aZ * 100);
+  IAx = (aX * 10);
+  IAy = (aY * 10);
+  IAz = (aZ * 10);
   IHeading = SuperCompass(mX, mY);
-  IGx = (gX * 100);
-  IGy = (gY * 100);
-  IGz = (gZ * 100);
+  IGx = (gX * 10);
+  IGy = (gY * 10);
+  IGz = (gZ * 10);
   
-  AxH = IAx >> 8;
-  AyH = IAy >> 8;
-  AzH = IAz >> 8;
-  HeadingH = IHeading >> 8;  
-  GxH = IGx >> 8;
-  GyH = IGy >> 8;
-  GzH = IGz >> 8;
+  AxH = highByte(IAx);
+  AyH = highByte(IAy);
+  AzH = highByte(IAz);
+  HeadingH = highByte(IHeading);  
+  GxH = highByte(IGx);
+  GyH = highByte(IGy);
+  GzH = highByte(IGz);
   
-  AxL = IAx;
-  AyL = IAy;
-  AzL = IAz;
-  HeadingL = IHeading;
-  GxL = IGx;
-  GyL = IGy;
-  GzL = IGz;
+  AxL = lowByte(IAx);
+  AyL = lowByte(IAy);
+  AzL = lowByte(IAz);
+  HeadingL = lowByte(IHeading);
+  GxL = lowByte(IGx);
+  GyL = lowByte(IGy);
+  GzL = lowByte(IGz);
   
   imuArray[0] = AxH;
   imuArray[1] = AxL;
