@@ -11,12 +11,14 @@
 #define SENSOR_8 9
 #define SENSOR_9 10
 
-
+#define SENSOR_HOLD_TIME 50
 
 const int I2C_ADDRESS = 0x10;   // Set the I2C slave address here
 
 byte activeSensor = 0;
+byte lastActiveSensor = 0;
 long lastchange = 0;
+long sensorDeactivatedTime = 0;
 
 void setup()
 {
@@ -49,7 +51,11 @@ void setup()
 
 void loop()
 {
-  
+  // Reset the active sensor number to 0 once the sensor has been active for a certain period
+  if ((sensorDeactivatedTime - lastchange) > SENSOR_HOLD_TIME)
+  {
+    activeSensor = 0;
+  }
 }
 
 
@@ -60,19 +66,31 @@ void requestHandler()
 }
 
 
+void activateSensor(int sensorNumber)
+{
+  lastActiveSensor = activeSensor;
+  activeSensor = sensorNumber;
+  lastchange = millis();
+}
+
+void deactivateSensor()
+{
+  if (activeSensor > 0)
+  {
+    activeSensor = 0;
+    sensorDeactivatedTime = millis();
+  }
+}
+
 void sensor1Interrupt()
 {
   if (digitalRead(SENSOR_1) == LOW)
   {
-    activeSensor = 1;
-    lastchange = millis();
+    activateSensor(1);
   }
   else
   {
-    if (activeSensor > 0 && ((lastchange - millis()) > 200))
-    {
-      activeSensor = 0;
-    }
+    deactivateSensor();
   }
 }
 
@@ -81,15 +99,11 @@ void sensor2Interrupt()
 {
   if (digitalRead(SENSOR_2) == LOW)
   {
-    activeSensor = 2;
-    lastchange = millis();
+    activateSensor(2);
   }
   else
   {
-    if (activeSensor > 0 && ((lastchange - millis()) > 200))
-    {
-      activeSensor = 0;
-    }
+    deactivateSensor();
   }
 }
 
@@ -97,15 +111,11 @@ void sensor3Interrupt()
 {
   if (digitalRead(SENSOR_3) == LOW)
   {
-    activeSensor = 3;
-    lastchange = millis();
+    activateSensor(3);
   }
   else
   {
-    if (activeSensor > 0 && ((lastchange - millis()) > 200))
-    {
-      activeSensor = 0;
-    }
+    deactivateSensor();
   }
 }
 
@@ -113,15 +123,11 @@ void sensor4Interrupt()
 {
   if (digitalRead(SENSOR_4) == LOW)
   {
-    activeSensor = 4;
-    lastchange = millis();
+    activateSensor(4);
   }
   else
   {
-    if (activeSensor > 0 && ((lastchange - millis()) > 200))
-    {
-      activeSensor = 0;
-    }
+    deactivateSensor();
   }
 }
 
@@ -129,15 +135,11 @@ void sensor5Interrupt()
 {
   if (digitalRead(SENSOR_5) == LOW)
   {
-    activeSensor = 5;
-    lastchange = millis();
+    activateSensor(5);
   }
   else
   {
-    if (activeSensor > 0 && ((lastchange - millis()) > 200))
-    {
-      activeSensor = 0;
-    }
+    deactivateSensor();
   }
 }
 
@@ -145,15 +147,11 @@ void sensor6Interrupt()
 {
   if (digitalRead(SENSOR_6) == LOW)
   {
-    activeSensor = 6;
-    lastchange = millis();
+    activateSensor(6);
   }
   else
   {
-    if (activeSensor > 0 && ((lastchange - millis()) > 200))
-    {
-      activeSensor = 0;
-    }
+    deactivateSensor();
   }
 }
 
@@ -161,15 +159,11 @@ void sensor7Interrupt()
 {
   if (digitalRead(SENSOR_7) == LOW)
   {
-    activeSensor = 7;
-    lastchange = millis();
+    activateSensor(7);
   }
   else
   {
-    if (activeSensor > 0 && ((lastchange - millis()) > 200))
-    {
-      activeSensor = 0;
-    }
+    deactivateSensor();
   }
 }
 
@@ -177,15 +171,11 @@ void sensor8Interrupt()
 {
   if (digitalRead(SENSOR_8) == LOW)
   {
-    activeSensor = 8;
-    lastchange = millis();
+    activateSensor(8);
   }
   else
   {
-    if (activeSensor > 0 && ((lastchange - millis()) > 200))
-    {
-      activeSensor = 0;
-    }
+    deactivateSensor();
   }
 }
 
@@ -193,15 +183,11 @@ void sensor9Interrupt()
 {
   if (digitalRead(SENSOR_9) == LOW)
   {
-    activeSensor = 9;
-    lastchange = millis();
+    activateSensor(9);
   }
   else
   {
-    if (activeSensor > 0 && ((lastchange - millis()) > 200))
-    {
-      activeSensor = 0;
-    }
+    deactivateSensor();
   }
 }
 
