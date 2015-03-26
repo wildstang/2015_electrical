@@ -348,10 +348,11 @@ UsedLibrary="C:/Program Files/EAGLE-7.1.0/lbr/xilinx-xc9.lbr"
 UsedLibrary="C:/Program Files/EAGLE-7.1.0/lbr/xilinx-xcv.lbr"
 UsedLibrary="C:/Program Files/EAGLE-7.1.0/lbr/zetex.lbr"
 UsedLibrary="C:/Program Files/EAGLE-7.1.0/lbr/zilog.lbr"
+UsedLibrary="C:/Program Files/EAGLE-7.1.0/lbr/SparkFun-Eagle-Libraries/SparkFun-Capacitors.lbr"
 
 [Win_1]
 Type="Control Panel"
-Loc="249 273 848 672"
+Loc="249 273 1092 726"
 State=2
 Number=0
 

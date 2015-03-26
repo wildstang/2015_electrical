@@ -369,8 +369,8 @@ UsedLibrary="C:/Program Files/EAGLE-7.1.0/lbr/SparkFun-Eagle-Libraries/SparkFun-
 
 [Win_1]
 Type="Control Panel"
-Loc="424 321 1023 720"
-State=1
+Loc="249 273 1092 726"
+State=2
 Number=0
 
 [Desktop]

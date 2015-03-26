@@ -20,7 +20,6 @@ UsedLibrary="C:/Program Files/EAGLE-7.1.0/lbr/74xx-us.lbr"
 UsedLibrary="C:/Program Files/EAGLE-7.1.0/lbr/751xx.lbr"
 UsedLibrary="C:/Program Files/EAGLE-7.1.0/lbr/IQD-Frequency-Products.lbr"
 UsedLibrary="C:/Program Files/EAGLE-7.1.0/lbr/LSF-SMT.lbr"
-UsedLibrary="C:/Program Files/EAGLE-7.1.0/lbr/TPS5430-Lauren.lbr"
 UsedLibrary="C:/Program Files/EAGLE-7.1.0/lbr/TPS5430.lbr"
 UsedLibrary="C:/Program Files/EAGLE-7.1.0/lbr/advanced-test-technologies.lbr"
 UsedLibrary="C:/Program Files/EAGLE-7.1.0/lbr/agilent-technologies.lbr"
@@ -369,8 +368,8 @@ UsedLibrary="C:/Program Files/EAGLE-7.1.0/lbr/SparkFun-Eagle-Libraries/SparkFun-
 
 [Win_1]
 Type="Control Panel"
-Loc="424 321 1023 720"
-State=1
+Loc="249 273 848 672"
+State=2
 Number=0
 
 [Desktop]
