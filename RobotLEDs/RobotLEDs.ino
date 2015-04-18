@@ -1,3 +1,5 @@
+#include <Adafruit_DotStar.h>
+
 /*
 Wildstang Lights 2015
 This is a change.
@@ -8,7 +10,6 @@ This is a change.
 // This needs to be defined before we include as there is a check for a define in twi.c
 //#define TWI_FREQ 38400L
 
-#include <LPD8806.h>
 #include "SPI.h"
 #include <Wire.h>
 #include "definitions.h"
@@ -19,14 +20,21 @@ This is a change.
 // This will use the following pins (SPI):
 // Data (SDA):  11
 // Clock (SCL): 13
-LPD8806 strip = LPD8806(STRIP_LENGTH);
+#define NUMPIXELS 30
+
+Adafruit_DotStar strip = Adafruit_DotStar(NUMPIXELS, 11, 13);
 
 unsigned long trailPattern[TRAIL_LENGTH + 1];
+
+#define ALLIANCE_RED 0x52
+#define ALLIANCE_BLUE 0x47
+#define ALLIANCE_PATTERN 0x04
+#define AUTONOMOUS 0x02
 
 // This the address to use for the arduino in slave mode when talking to the cRIO.
 // This number may differ from the address that the cRIO expects. Sniff the I2C lines
 // to check what address correlates to the actual integer given here
-static const byte i2cAddress = 82;
+static const byte i2cAddress = 0x12;
 
 // This boolean gets set when we have new data that has been verified to be correct following our checks
 boolean dataChanged = false;
@@ -88,78 +96,33 @@ void loop()
 
 // Since we don't know what alliace we are on yet (due to the bootup time of the cRIO), we use the
 // preprocessor to define what will be run. This will eventually be ported over to a digitalRead with a switch
-#ifdef RED_ALLIANCE   
-   if (firstRun == true)
+   // Show rainbow if not told to do anything else
+   if (commandByte == 0)
    {
-      gyroCalibrate(5, 50, 120, 127, 0, 0);
-      initShootingTrailPattern(127, 0, 0);
-      for(byte loops = 0; loops < 20; loops++)
-      {
-         faderRed(30);
-      }
-      firstRun = false;
    }
-#endif
-
-#ifdef BLUE_ALLIANCE   
-   if (firstRun == true)
-   {
-      gyroCalibrate(5, 50, 120, 0, 0, 127);
-      initShootingTrailPattern(0, 0, 127);
-      for(byte loops = 0; loops < 20; loops++)
-      {
-         faderBlue(30);
-      }
-      firstRun = false;
-   }
-#endif
 
    // With the initial bootup run out of the way, we now enter the main chunk of the loop.
    // The program will sit in the "else" statement until a valid set of bytes are received
-   if (
-   (commandByte == 0x02) &&
+   else if (
+   (commandByte == AUTONOMOUS) &&
    (payloadByte1 == 0x2F) &&
    (payloadByte2 == 0x12))
    {
       dataChanged = false;
       autonomous();
    }
-   else if (
-   (commandByte == 0x05) &&
-   (payloadByte1 == 0x13) &&
-   (payloadByte2 == 0x14))
+   else if (commandByte == ALLIANCE_PATTERN)
    {
+     if (payloadByte1 == ALLIANCE_RED)
+     {
       dataChanged = false;
-      shoot(10, 1000);
-   }
-   else if (
-   (commandByte == 0x06) &&
-   (payloadByte1 == 0x11) &&
-   (payloadByte2 == 0x12))
-   {
+      allianceSelection(6);
+     }
+     else if (payloadByte1 == ALLIANCE_BLUE)
+     {
       dataChanged = false;
-      climb(20, 20, 4, 50, 120, 800);
-   }
-   else if (
-   (commandByte == 0x07) &&
-   (payloadByte1 == 0x11) &&
-   (payloadByte2 == 0x12))
-   {
-      dataChanged = false;
-      if (intakeOn == false)
-      {
-         intakeOn = true;
-         while (dataChanged == false)
-         {
-            // Check these values!
-            intake(10, 500);
-         }
-      }
-      else
-      {
-         intakeOn = false;
-         setDrivingState();
-      }
+      allianceSelection(6);
+     }
    }
    else if (
    (commandByte == 0x08) &&
@@ -169,19 +132,13 @@ void loop()
       dataChanged = false;
       if (alliance == 1)
       {
-         scanner(127, 0, 0, 20, true);
+         scanner(255, 0, 0, 20, true);
       }
       else if (alliance == 2)
       {
-         scanner(0, 0, 127, 20, true);
+         scanner(0, 0, 255, 20, true);
       }
       rainbowWheel(3);
-   }
-   else if (
-   (commandByte == 0x04))
-   {
-      dataChanged = false;
-      allianceSelection(6);
    }
    else
    {
@@ -238,91 +195,6 @@ void blankRange(unsigned int p_start, unsigned int p_end)
    strip.show();
 }
 
-
-void initShootingTrailPattern(byte red, byte green, byte blue)
-{
-   byte dimRed = red / TRAIL_LENGTH;
-   byte dimGreen = green / TRAIL_LENGTH;
-   byte dimBlue = blue / TRAIL_LENGTH;
-
-   // Set up the trail pattern
-   trailPattern[0] = 0;
-   for (unsigned int i = 1; i <= TRAIL_LENGTH; i++)
-   {
-      int index = TRAIL_LENGTH + 1 - i;
-      trailPattern[index] = strip.Color(max(red - (dimRed * (i - 1)), 0), max(green - (dimGreen * (i - 1)), 0), max(blue - (dimBlue * (i - 1)), 0));
-   }
-
-}
-
-void shoot(unsigned int shotSpeed, unsigned int waitAfter)
-{
-   int currentPixel, lastStart = 0;
-   unsigned int h;
-   
-   for(h=0; h < STRIP_LENGTH; h++)
-   {
-      strip.setPixelColor(h, 0);
-   }
-
-   // Fill in colours
-   for (unsigned int i = SHOOT_TRAIL_START; i <= SHOOT_TRAIL_END; i++)
-   {
-      lastStart = i - TRAIL_LENGTH;
-
-      for (unsigned int j = 0; j <= TRAIL_LENGTH; j++)
-      {
-         currentPixel = lastStart + j;
-         
-         if (currentPixel < 0)
-         {
-            // Work out position at end
-            currentPixel = SHOOT_TRAIL_END + 1 + currentPixel;  // subtracts from length to get index
-         }
-         if (currentPixel >= SHOOT_TRAIL_START)
-         {
-            strip.setPixelColor(currentPixel, trailPattern[j]);
-            strip.setPixelColor(STRIP_LENGTH - 1 - currentPixel, trailPattern[j]);
-         }
-      }
-
-      if ((i - SHOOT_TRAIL_START) >= ARROW_TRIGGER_1)
-      {
-         setArrow1Colour(127, 127, 0);
-      }
-      if ((i - SHOOT_TRAIL_START) >= ARROW_TRIGGER_2)
-      {
-         setArrow2Colour(127, 127, 0);
-      }
-      if ((i - SHOOT_TRAIL_START) >= ARROW_TRIGGER_3)
-      {
-         setArrow3Colour(127, 127, 0);
-      }
-      if ((i - SHOOT_TRAIL_START) >= ARROW_TRIGGER_4)
-      {
-         setArrow4Colour(127, 127, 0);
-      }
-
-      strip.show();
-      if (true == timedWait(shotSpeed))
-      {
-         return;
-      }
-   }
-   
-   // Clean out the strip after a shot
-   for(h=0; h < STRIP_LENGTH; h++)
-   {
-      strip.setPixelColor(h, 0);
-   }
-   
-   if (true == timedWait(waitAfter))
-   {
-      return;
-   }
-   
-   setDrivingState();
-}
 
 
 void twinkle(byte times, byte numLit)
@@ -803,14 +675,15 @@ void allianceSelection(byte times)
    {
       return;
    }
-   if (payloadByte1 == 0x52)
+   if (payloadByte1 == ALLIANCE_RED)
    {
       alliance = 1;
       for (q=0; q < times; q++)
       {
          for (p=0; p < payloadByte2; p++)
          {
-            faderRed(30);
+           colorBlink(50, 50, 255, 0, 0); 
+           //faderRed(30);
          }
          if (true == timedWait(600))
          {
@@ -818,14 +691,15 @@ void allianceSelection(byte times)
          }
       }
    }
-   else if (payloadByte1 == 0x47)
+   else if (payloadByte1 == ALLIANCE_BLUE)
    {
       alliance = 2;
       for (q=0; q < times; q++)
       {
          for (p=0; p < payloadByte2; p++)
          {
-            faderBlue(30);
+            colorBlink(50, 50, 0, 0, 255); 
+            //faderBlue(30);
          }
          if (true == timedWait(600))
          {
@@ -840,10 +714,8 @@ void autonomous()
 {
    for (int i=0; i < 5; i++)
    {
-      scanner(0, 0, 127, 20, true);
+      scanner(255, 255, 0, 20, true);
    }
-   
-   alternatingColor(0, 0, 127, 0, 0, 127, 150, 150, 20);
 }
 
 
